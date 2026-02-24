@@ -16,7 +16,7 @@ All configuration is done via environment variables.
 | `NULL_CORE_URL`                 | null-core backend url                  |                    | [x]        |
 | `DOMAIN`                        | email domain to serve                  |                    | [x]        |
 | `SMTP_PORT`                     | smtp server address                    | `127.0.0.1:2525`   | [ ]        |
-| `GRPC_PORT`                     | grpc health check address              | `127.0.0.1:50052`  | [ ]        |
+| `GRPC_PORT`                     | grpc health check address              | `127.0.0.1:55557`  | [ ]        |
 | `TLS_KEY`                       | tls private key file path              |                    | [ ]        |
 | `LOG_LEVEL`                     | log level (debug, info, warn, error)   | `info`             | [ ]        |
 | `TLS_CERT`                      | tls certificate file path              |                    | [ ]        |

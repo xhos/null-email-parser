@@ -58,7 +58,7 @@ func Load() Config {
 
 	grpcAddress := os.Getenv("GRPC_PORT")
 	if grpcAddress == "" {
-		grpcAddress = "127.0.0.1:50052"
+		grpcAddress = "127.0.0.1:55557"
 	}
 
 	logLevel, err := log.ParseLevel(os.Getenv("LOG_LEVEL"))

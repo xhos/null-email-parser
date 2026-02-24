@@ -58,7 +58,7 @@
             go test ./...
           '')
 
-          (writeShellScriptBin "bump-proto" ''
+          (writeShellScriptBin "bump-protos" ''
             git -C proto fetch origin
             git -C proto checkout main
             git -C proto pull --ff-only

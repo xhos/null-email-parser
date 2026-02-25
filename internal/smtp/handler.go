@@ -122,32 +122,29 @@ func (h *EmailHandler) saveEmailToFile(userUUID, from string, data []byte) error
 		return fmt.Errorf("failed to create debug directory: %w", err)
 	}
 
-	msg, _, err := email.ParseMessage(data)
+	msg, decoded, err := email.ParseMessage(data)
 	if err != nil {
-		h.Log.Warn("failed to parse email for debug file, saving raw", "err", err)
-		timestamp := time.Now().Format("20060102-150405")
-		filename := fmt.Sprintf("%s_%s_%s.eml", userUUID, timestamp, strings.ReplaceAll(from, "@", "_at_"))
-		filePath := filepath.Join(debugDir, filename)
-
-		if err := os.WriteFile(filePath, data, 0644); err != nil {
-			return fmt.Errorf("failed to write debug email file: %w", err)
-		}
-		h.Log.Info("saved raw debug email file", "path", filePath, "size", len(data))
-		return nil
+		return fmt.Errorf("failed to parse email for debug file: %w", err)
 	}
 
 	subject := msg.Header.Get("Subject")
 	sanitizedSubject := sanitizeFilename(subject)
 	timestamp := time.Now().Format("20060102-150405")
+	baseName := fmt.Sprintf("%s_%s_%s_%s", userUUID, timestamp, sanitizedSubject, strings.ReplaceAll(from, "@", "_at_"))
 
-	filename := fmt.Sprintf("%s_%s_%s_%s.eml", userUUID, timestamp, sanitizedSubject, strings.ReplaceAll(from, "@", "_at_"))
-	filePath := filepath.Join(debugDir, filename)
-
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	content := fmt.Sprintf("Subject: %s\nFrom: %s\nTo: %s\nDate: %s\n\n%s",
+		subject,
+		msg.Header.Get("From"),
+		msg.Header.Get("To"),
+		msg.Header.Get("Date"),
+		decoded,
+	)
+	filePath := filepath.Join(debugDir, baseName+".decoded.eml")
+	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write debug email file: %w", err)
 	}
 
-	h.Log.Info("saved debug email file", "path", filePath, "size", len(data), "subject", subject)
+	h.Log.Info("saved debug email file", "path", filePath, "size", len(content), "subject", subject)
 	return nil
 }
 

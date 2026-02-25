@@ -70,20 +70,27 @@ func processTestDataDir(logger *log.Logger, dir string) (int, error) {
 		}
 
 		filename := file.Name()
+		filePath := filepath.Join(dir, filename)
+
 		isAlreadyDecoded := strings.HasSuffix(filename, ".decoded.eml")
 		isRawEmailFile := strings.HasSuffix(filename, ".eml") && !isAlreadyDecoded
 
-		if !isRawEmailFile {
+		if isRawEmailFile {
+			if err := processEmailFile(filePath); err != nil {
+				logger.Error("Failed to process raw email", "file", filePath, "error", err)
+				continue
+			}
+			processed++
 			continue
 		}
 
-		filePath := filepath.Join(dir, filename)
-		if err := processEmailFile(filePath); err != nil {
-			logger.Error("Failed to process", "file", filePath, "error", err)
-			continue
+		if isAlreadyDecoded {
+			if err := anonymizeDecodedFile(filePath); err != nil {
+				logger.Error("Failed to anonymize decoded file", "file", filePath, "error", err)
+				continue
+			}
+			processed++
 		}
-
-		processed++
 	}
 
 	return processed, nil
@@ -120,6 +127,19 @@ Date: %s
 		anonymizeContent(content))
 
 	return os.WriteFile(decodedPath, []byte(decodedEmail), 0644)
+}
+
+func anonymizeDecodedFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	content := string(data)
+
+	content = anonymizeContent(content)
+
+	return os.WriteFile(filePath, []byte(content), 0644)
 }
 
 func createDecodedPath(originalPath, subject string) string {
@@ -178,6 +198,7 @@ func anonymizeEmail(header string) string {
 
 	nameEmailPattern := regexp.MustCompile(`^(.+?)\s*<([^>]+)>$`)
 	emailOnlyPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	emailPattern := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 
 	if nameEmailPattern.MatchString(header) {
 		return "Example <email@example.com>"
@@ -187,12 +208,11 @@ func anonymizeEmail(header string) string {
 		return "email@example.com"
 	}
 
-	emailPattern := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 	return emailPattern.ReplaceAllString(header, "email@example.com")
 }
 
 func anonymizeContent(content string) string {
-	httpPattern := regexp.MustCompile(`https?://[^\s\)>\]]+`)
+	httpPattern := regexp.MustCompile(`https?://[^\s"'<>)\]]+`)
 	content = httpPattern.ReplaceAllString(content, "https://example.com")
 
 	fromPattern := regexp.MustCompile(`From:\s*(.+?)\s*<([^>]+)>`)

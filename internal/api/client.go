@@ -100,16 +100,17 @@ func (c *Client) GetAccounts(userID string) ([]*pb.Account, error) {
 	return resp.Accounts, nil
 }
 
-func (c *Client) CreateAccount(userID, name, bank string) (*pb.Account, error) {
+func (c *Client) CreateAccount(userID, name, bank, currency string) (*pb.Account, error) {
 	ctx := c.withAuth(context.Background())
 
 	req := &pb.CreateAccountRequest{
-		UserId: userID,
-		Name:   name,
-		Bank:   bank,
-		Type:   pb.AccountType_ACCOUNT_CHEQUING,
+		UserId:       userID,
+		Name:         name,
+		Bank:         bank,
+		Type:         pb.AccountType_ACCOUNT_CHEQUING,
+		MainCurrency: currency,
 		AnchorBalance: &money.Money{
-			CurrencyCode: "CAD",
+			CurrencyCode: currency,
 			Units:        0,
 			Nanos:        0,
 		},

@@ -164,7 +164,7 @@ func (h *EmailHandler) resolveAccount(userUUID string, txn *domain.Transaction, 
 		return nil
 	}
 
-	account, err := h.API.CreateAccount(userUUID, cleanAccount, txn.TxBank)
+	account, err := h.API.CreateAccount(userUUID, cleanAccount, txn.TxBank, txn.TxCurrency)
 	if err != nil {
 		return fmt.Errorf("failed to create account for %s-%s: %w", txn.TxBank, cleanAccount, err)
 	}

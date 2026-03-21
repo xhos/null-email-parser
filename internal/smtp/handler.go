@@ -98,7 +98,11 @@ func (h *EmailHandler) ProcessEmail(userUUID, from string, to []string, data []b
 		if acc.Name == "" {
 			continue
 		}
-		accountMap[fmt.Sprintf("%s-%s", strings.ToLower(acc.Bank), acc.Name)] = int(acc.Id)
+		bankPrefix := strings.ToLower(acc.Bank)
+		accountMap[fmt.Sprintf("%s-%s", bankPrefix, acc.Name)] = int(acc.Id)
+		for _, alias := range acc.Aliases {
+			accountMap[fmt.Sprintf("%s-%s", bankPrefix, alias)] = int(acc.Id)
+		}
 	}
 
 	if err := h.resolveAccount(userUUID, txn, accountMap, user); err != nil {

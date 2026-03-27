@@ -19,6 +19,7 @@ All configuration is done via environment variables.
 | `GRPC_PORT`                     | grpc health check address              | `127.0.0.1:55557`  | [ ]        |
 | `TLS_KEY`                       | tls private key file path              |                    | [ ]        |
 | `LOG_LEVEL`                     | log level (debug, info, warn, error)   | `info`             | [ ]        |
+| `LOG_FORMAT`                    | log format (json, text)                | `text`             | [ ]        |
 | `TLS_CERT`                      | tls certificate file path              |                    | [ ]        |
 | `UNSAFE_DISABLE_TLS_REQUIRED`   | allow opportunistic TLS                | `false`            | [ ]        |
 | `UNSAFE_SAVE_EML`               | save incoming emails as .eml files     | `false`            | [ ]        |
@@ -26,6 +27,7 @@ All configuration is done via environment variables.
 - `SMTP_PORT` and `GRPC_PORT` can be specified as just the port number (e.g., `2525`), with colon prefix (`:2525`), or as full address (`0.0.0.0:2525`)
 - by default, services bind to `127.0.0.1` (localhost only) for security. use `0.0.0.0:port` to expose externally
 - when `TLS_CERT` and `TLS_KEY` are provided, TLS is required by default. set `UNSAFE_DISABLE_TLS_REQUIRED` to allow opportunistic TLS (accept non-TLS connections)
+- when `LOG_FORMAT=json`, logs are written to both stdout and `null-email-parser.log` in the working directory. useful for pointing monitoring tools at the log file
 - email body content is never logged for privacy/security reasons. use `UNSAFE_SAVE_EML` to save emails to disk for debugging parsers
 - parsing failures are logged at ERROR level for visibility in monitoring
 

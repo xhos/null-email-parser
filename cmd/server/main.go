@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,9 +20,28 @@ func main() {
 	cfg := config.Load()
 
 	// ----- logger -----------------
-	logger := log.NewWithOptions(os.Stdout, log.Options{
-		Prefix: "email-parser",
-		Level:  cfg.LogLevel,
+	var logFile *os.File
+
+	logWriter := io.Writer(os.Stdout)
+	logFormatter := log.TextFormatter
+
+	if cfg.LogFormat != "text" {
+		var err error
+		logFile, err = os.OpenFile("null-email-parser.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal("failed to create log file", "err", err)
+		}
+		defer logFile.Close()
+
+		logWriter = io.MultiWriter(os.Stdout, logFile)
+		logFormatter = log.JSONFormatter
+	}
+
+	logger := log.NewWithOptions(logWriter, log.Options{
+		ReportTimestamp: true,
+		Prefix:          "email-parser",
+		Level:           cfg.LogLevel,
+		Formatter:       logFormatter,
 	})
 
 	logger.Info("starting email-parser", "version", version.FullVersion())
@@ -52,7 +72,7 @@ func main() {
 
 	// ----- services ---------------
 	handler := smtp.NewEmailHandler(apiClient, logger, cfg.UnsafeSaveEML)
-	smtpServer := smtp.NewServer(cfg.SMTPAddress, cfg.Domain, handler)
+	smtpServer := smtp.NewServer(cfg.SMTPAddress, cfg.Domain, handler, logger)
 	if cfg.TLSCert != "" && cfg.TLSKey != "" {
 		smtpServer = smtpServer.WithTLS(cfg.TLSCert, cfg.TLSKey, cfg.TLSRequired)
 	}

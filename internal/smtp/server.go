@@ -27,12 +27,12 @@ type Server struct {
 	tlsRequired bool
 }
 
-func NewServer(addr, domain string, handler Handler) *Server {
+func NewServer(addr, domain string, handler Handler, logger *log.Logger) *Server {
 	return &Server{
 		addr:    addr,
 		domain:  domain,
 		handler: handler,
-		log:     log.NewWithOptions(nil, log.Options{Prefix: "smtp"}),
+		log:     logger.WithPrefix("smtp"),
 	}
 }
 

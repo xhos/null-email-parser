@@ -21,7 +21,8 @@ type Config struct {
 
 	UnsafeSaveEML bool // save incoming emails to disk for debugging
 
-	LogLevel log.Level // logging level
+	LogLevel  log.Level // logging level
+	LogFormat string    // "json" | "text"
 }
 
 // safely parse whatever port or address the user provides
@@ -66,6 +67,11 @@ func Load() Config {
 		logLevel = log.InfoLevel
 	}
 
+	logFormat := strings.ToLower(strings.TrimSpace(os.Getenv("LOG_FORMAT")))
+	if logFormat != "json" && logFormat != "text" {
+		logFormat = "text"
+	}
+
 	tlsCert := os.Getenv("TLS_CERT")
 	tlsKey := os.Getenv("TLS_KEY")
 
@@ -84,5 +90,6 @@ func Load() Config {
 		TLSRequired:   tlsRequired,
 		UnsafeSaveEML: os.Getenv("UNSAFE_SAVE_EML") != "",
 		LogLevel:      logLevel,
+		LogFormat:     logFormat,
 	}
 }

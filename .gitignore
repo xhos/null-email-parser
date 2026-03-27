@@ -11,3 +11,4 @@ cfg/
 tmp/
 certs/
 debug_emails/
+*.log

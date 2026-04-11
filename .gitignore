@@ -12,3 +12,4 @@ tmp/
 certs/
 debug_emails/
 *.log
+result

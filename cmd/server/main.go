@@ -20,20 +20,11 @@ func main() {
 	cfg := config.Load()
 
 	// ----- logger -----------------
-	var logFile *os.File
 
 	logWriter := io.Writer(os.Stdout)
 	logFormatter := log.TextFormatter
 
 	if cfg.LogFormat != "text" {
-		var err error
-		logFile, err = os.OpenFile("null-email-parser.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatal("failed to create log file", "err", err)
-		}
-		defer logFile.Close()
-
-		logWriter = io.MultiWriter(os.Stdout, logFile)
 		logFormatter = log.JSONFormatter
 	}
 

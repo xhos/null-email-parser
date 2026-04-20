@@ -141,6 +141,9 @@ func (c *Client) CreateTransaction(userID string, tx *domain.Transaction) error 
 	}
 
 	// Optional fields
+	if tx.EmailID != "" {
+		txInput.ExternalId = &tx.EmailID
+	}
 	if tx.TxDesc != "" {
 		txInput.Description = &tx.TxDesc
 	}
